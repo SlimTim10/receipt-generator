@@ -2,4 +2,4 @@
 
 ## Description
 
-TODO
+GUI receipt/quote generator tool for business.
