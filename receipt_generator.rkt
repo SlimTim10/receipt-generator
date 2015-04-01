@@ -39,7 +39,7 @@
 (define num-field (new text-field%
 					   [label "Number:"]
 					   [parent settings-panel]
-					   [init-value "100064"]))
+					   [init-value "100000"]))
 
 (define purchaser-field (new text-field%
 					   [label "Purchaser Name:"]
