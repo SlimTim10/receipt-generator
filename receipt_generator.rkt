@@ -157,6 +157,7 @@
 	  (set! htmlfile (string-append "r" htmlfile)))
   (define total-hst (get-total-hst))
   (define total-final (+ (get-total-price) total-hst))
+  (define hst-number "HST # 811480060 RT 0001")
   (define content
 	(xexpr->string
 	 (quasiquote
@@ -235,7 +236,9 @@
 							 (td "Total")
 							 (td nbsp)
 							 (td (unquote (string-append "$" (real->decimal-string total-final))))))
-				  (hr ((style "margin-top:20px"))))))))
+				  (div (unquote hst-number))
+				  (hr ((style "margin-bottom:50px")))
+				  (hr))))))
   (set! content (string-replace content "ITEM_ROWS" (items-to-html) #:all? #f))
   (send generate-message set-label (string-append "Generated document: " (path->string (current-directory)) htmlfile))
   (display-to-file content htmlfile #:mode 'text #:exists 'replace))
