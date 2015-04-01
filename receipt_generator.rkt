@@ -3,15 +3,6 @@
 (require xml)
 (require srfi/19)
 
-(define (show-purchaser-field)
-  (if (equal? (send rorq-choice get-string-selection) "Quote")
-	  (begin
-		(send purchaser-field show #t)
-		(send purchaser-email-field show #t))
-	  (begin
-		(send purchaser-field show #f)
-		(send purchaser-email-field show #f))))
-
 (define frame (new frame%
 				   [label "Icewire Receipt Generator"]
 				   [spacing 10]))
@@ -33,9 +24,7 @@
 (define rorq-choice (new choice%
 				  [label "Type:"]
 				  [parent settings-panel]
-				  [choices (list "Receipt" "Quote")]
-				  [callback (lambda (choice event)
-							  (show-purchaser-field))]))
+				  [choices (list "Receipt" "Quote")]))
 
 (define num-field (new text-field%
 					   [label "Number:"]
@@ -47,7 +36,12 @@
 					   [parent settings-panel]
 					   [init-value (date->string (current-date) "~B ~d, ~Y")]))
 
-(define purchaser-field (new text-field%
+(define purchaser-org-field (new text-field%
+					   [label "Purchaser Organization:"]
+					   [parent settings-panel]
+					   [style '(single vertical-label)]))
+
+(define purchaser-name-field (new text-field%
 					   [label "Purchaser Name:"]
 					   [parent settings-panel]
 					   [style '(single vertical-label)]))
@@ -146,11 +140,9 @@
   (define rorq (send rorq-choice get-string-selection))
   (define num (send num-field get-value))
   (define htmlfile (string-append num ".html"))
-  (define purchaser "")
-  (define purchaser-email "")
-  (when (equal? rorq "Quote")
-		(set! purchaser (send purchaser-field get-value))
-		(set! purchaser-email (send purchaser-email-field get-value)))
+  (define purchaser-org (send purchaser-org-field get-value))
+  (define purchaser-name (send purchaser-name-field get-value))
+  (define purchaser-email (send purchaser-email-field get-value))
   (define date (send date-field get-value))
   (if (equal? rorq "Quote")
 	  (set! htmlfile (string-append "q" htmlfile))
@@ -194,15 +186,18 @@
 							  (p ((style "font-weight:bold; font-size:30px")) (unquote (string-append (substring rorq 0 1) num)))
 							  (p ((style "font-size:20px")) (unquote (string-append "Date: " date))))))
 				  (div ((style "background-color:#1f497d; width:100%; height:26px; margin:10px 0 10px 0")))
-				  (unquote (if (equal? rorq "Quote")
+				  (unquote (if (or (not (string=? purchaser-org "")) (not (string=? purchaser-name "")) (not (string=? purchaser-email "")))
 							   (quasiquote
 								(table ((style "width:100%"))
 									   (tr
 										(td ((style "width:33%; text-align:left"))
 											(p ((style "font-weight:bold")) "Purchaser:")
-											(p ((style "font-style:italic")) (unquote purchaser))
+											(p ((style "font-style:italic")) (unquote purchaser-org))
+											(p ((style "font-style:italic")) (unquote purchaser-name))
 											(p ((style "font-style:italic")) (unquote purchaser-email)))
-										(td ((style "width:33%; text-align:center")) "This quote is valid for 30 days")
+										(unquote (if (equal? rorq "Quote")
+													 (quasiquote (td ((style "width:33%; text-align:center")) "This quote is valid for 30 days"))
+													 ""))
 										(td ((style "width:33%; text-align:right"))))))
 							   ""))
 				  (div ((style "float:right; margin-top:100px")) "ALL CDN$")
@@ -243,5 +238,4 @@
   (send generate-message set-label (string-append "Generated document: " (path->string (current-directory)) htmlfile))
   (display-to-file content htmlfile #:mode 'text #:exists 'replace))
 
-(show-purchaser-field)
 (send frame show #t)
