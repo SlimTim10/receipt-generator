@@ -3,10 +3,6 @@
 (require xml)
 (require srfi/19)
 
-;;;TMP
-(define hst 129)
-(define total 2000)
-
 (define (show-purchaser-field)
   (if (equal? (send rorq-choice get-string-selection) "Quote")
 	  (begin
@@ -91,27 +87,51 @@
 
 (define (-items-to-html items num)
   (cond
-   [(empty? items) empty]
-   [(string=? (send (list-ref (car items) 1) get-value) "") empty]
+   [(empty? items) ""]
+   [(string=? (send (list-ref (car items) 1) get-value) "") ""]
    [else
-	(define quantity (send (list-ref (car items) 1) get-value))
+	(define quantity (string->number (send (list-ref (car items) 1) get-value)))
 	(define part-no (send (list-ref (car items) 2) get-value))
 	(define desc (send (list-ref (car items) 3) get-value))
-	(define price (send (list-ref (car items) 4) get-value))
-	(define total-price (number->string (* (string->number price) (string->number quantity))))
-	(cons
-	 (quasiquote
-	  (tr
-	   (td (unquote (number->string num)))
-	   (td (unquote quantity))
-	   (td (unquote part-no))
-	   (td (unquote desc))
-	   (td (unquote price))
-	   (td (unquote total-price))))
+	(define price (string->number (send (list-ref (car items) 4) get-value)))
+	(define total-price (* price quantity))
+	(string-append
+	 (xexpr->string
+	  (quasiquote
+	   (tr
+		(td (unquote (number->string num)))
+		(td (unquote (number->string quantity)))
+		(td (unquote part-no))
+		(td (unquote desc))
+		(td (unquote (string-append "$" (real->decimal-string price))))
+		(td (unquote (string-append "$" (real->decimal-string total-price)))))))
 	 (-items-to-html (cdr items) (+ num 1)))]))
-
 (define (items-to-html)
   (-items-to-html item-panels 1))
+
+(define (-get-total-hst items)
+  (cond
+   [(empty? items) 0]
+   [(string=? (send (list-ref (car items) 1) get-value) "") 0]
+   [else
+	(let* ([quantity (string->number (send (list-ref (car items) 1) get-value))]
+		   [price (string->number (send (list-ref (car items) 4) get-value))]
+		   [total-price (* price quantity)])
+	  (+ (* total-price 0.13) (-get-total-hst (cdr items))))]))
+(define (get-total-hst)
+  (-get-total-hst item-panels))
+
+(define (-get-total-price items)
+  (cond
+   [(empty? items) 0]
+   [(string=? (send (list-ref (car items) 1) get-value) "") 0]
+   [else
+	(let* ([quantity (string->number (send (list-ref (car items) 1) get-value))]
+		   [price (string->number (send (list-ref (car items) 4) get-value))]
+		   [total-price (* price quantity)])
+	  (+ total-price (-get-total-price (cdr items))))]))
+(define (get-total-price)
+  (-get-total-price item-panels))
 
 (define (generate-document)
   (define rorq (send rorq-choice get-string-selection))
@@ -126,6 +146,8 @@
   (if (equal? rorq "Quote")
 	  (set! htmlfile (string-append "q" htmlfile))
 	  (set! htmlfile (string-append "r" htmlfile)))
+  (define total-hst (get-total-hst))
+  (define total-final (+ (get-total-price) total-hst))
   (define content
 	(xexpr->string
 	 (quasiquote
@@ -182,7 +204,7 @@
 							 (th "Description")
 							 (th ((style "width:1em; padding:0 1em 0 1em")) "Price")
 							 (th ((style "width:1em; padding:0 1em 0 1em")) "Total"))
-						 (unquote (car (cdr (items-to-html))));;;HERE
+						 "ITEM_ROWS"
 						 (tr
 						  (td nbsp)
 						  (td nbsp)
@@ -196,15 +218,16 @@
 						  (td nbsp)
 						  (td "HST")
 						  (td nbsp)
-						  (td (unquote (string-append "$" (real->decimal-string hst)))))
+						  (td (unquote (string-append "$" (real->decimal-string total-hst)))))
 						 (tr ((style "font-weight:bold; font-size:18px"))
 							 (td nbsp)
 							 (td nbsp)
 							 (td nbsp)
 							 (td "Total")
 							 (td nbsp)
-							 (td (unquote (string-append "$" (real->decimal-string total))))))
+							 (td (unquote (string-append "$" (real->decimal-string total-final))))))
 				  (hr ((style "margin-top:20px"))))))))
+  (set! content (string-replace content "ITEM_ROWS" (items-to-html) #:all? #f))
   (display-to-file content htmlfile #:mode 'text #:exists 'replace))
 
 (show-purchaser-field)
