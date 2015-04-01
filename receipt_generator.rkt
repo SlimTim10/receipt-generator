@@ -13,7 +13,8 @@
 		(send purchaser-email-field show #f))))
 
 (define frame (new frame%
-				   [label "Icewire Receipt Generator"]))
+				   [label "Icewire Receipt Generator"]
+				   [spacing 10]))
 
 (define main-panel (new horizontal-panel%
 						[parent frame]
@@ -62,6 +63,11 @@
 							 [parent frame]
 							 [callback (lambda (button event)
 										 (generate-document))]))
+
+(define generate-message (new message%
+							  [label ""]
+							  [parent frame]
+							  [auto-resize #t]))
 
 (define (create-item-panels i)
   (cond
@@ -231,6 +237,7 @@
 							 (td (unquote (string-append "$" (real->decimal-string total-final))))))
 				  (hr ((style "margin-top:20px"))))))))
   (set! content (string-replace content "ITEM_ROWS" (items-to-html) #:all? #f))
+  (send generate-message set-label (string-append "Generated document: " (path->string (current-directory)) htmlfile))
   (display-to-file content htmlfile #:mode 'text #:exists 'replace))
 
 (show-purchaser-field)
