@@ -17,7 +17,7 @@
 
 (define main-panel (new horizontal-panel%
 						[parent frame]
-						[spacing 100]))
+						[spacing 50]))
 
 (define settings-panel (new vertical-panel%
 							[parent main-panel]
@@ -41,18 +41,21 @@
 					   [parent settings-panel]
 					   [init-value "100000"]))
 
-(define purchaser-field (new text-field%
-					   [label "Purchaser Name:"]
-					   [parent settings-panel]))
-
-(define purchaser-email-field (new text-field%
-					   [label "Purchaser Email:"]
-					   [parent settings-panel]))
-
 (define date-field (new text-field%
 					   [label "Date:"]
 					   [parent settings-panel]
 					   [init-value (date->string (current-date) "~B ~d, ~Y")]))
+
+(define purchaser-field (new text-field%
+					   [label "Purchaser Name:"]
+					   [parent settings-panel]
+					   [style '(single vertical-label)]))
+
+(define purchaser-email-field (new text-field%
+					   [label "Purchaser Email:"]
+					   [parent settings-panel]
+					   [min-width 200]
+					   [style '(single vertical-label)]))
 
 (define generate-button (new button%
 							 [label "&Generate"]
@@ -83,7 +86,7 @@
 		   [label "Unit price: $"]
 		   [parent tmp-panel]))
 	 (create-item-panels (- i 1)))]))
-(define item-panels (create-item-panels 20))
+(define item-panels (create-item-panels 25))
 
 (define (-items-to-html items num)
   (cond
