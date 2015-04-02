@@ -223,27 +223,47 @@
 						  (td nbsp)
 						  (td nbsp)
 						  (td nbsp))
-						 (tr
-						  (td nbsp)
-						  (td nbsp)
-						  (td nbsp)
-						  (td "Subtotal")
-						  (td nbsp)
-						  (td (unquote (string-append "$" (real->decimal-string subtotal)))))
-						 (tr
-						  (td nbsp)
-						  (td nbsp)
-						  (td nbsp)
-						  (td "HST")
-						  (td nbsp)
-						  (td (unquote (string-append "$" (real->decimal-string total-hst)))))
-						 (tr ((style "font-weight:bold; font-size:18px"))
-							 (td nbsp)
-							 (td nbsp)
-							 (td nbsp)
-							 (td "Total")
-							 (td nbsp)
-							 (td (unquote (string-append "$" (real->decimal-string (+ subtotal total-hst)))))))
+						 (unquote
+						  (cond [(string=? currency "CAD")
+								 (quasiquote
+								  (tr
+								   (td nbsp)
+								   (td nbsp)
+								   (td nbsp)
+								   (td "Subtotal")
+								   (td nbsp)
+								   (td (unquote (string-append "$" (real->decimal-string subtotal))))))]
+								[(string=? currency "USD") ""]))
+						 (unquote
+						  (cond [(string=? currency "CAD")
+								 (quasiquote
+								  (tr
+								   (td nbsp)
+								   (td nbsp)
+								   (td nbsp)
+								   (td "HST")
+								   (td nbsp)
+								   (td (unquote (string-append "$" (real->decimal-string total-hst))))))]
+								[(string=? currency "USD") ""]))
+						 (unquote
+						  (cond [(string=? currency "CAD")
+								 (quasiquote
+								  (tr ((style "font-weight:bold; font-size:18px"))
+									  (td nbsp)
+									  (td nbsp)
+									  (td nbsp)
+									  (td "Total")
+									  (td nbsp)
+									  (td (unquote (string-append "$" (real->decimal-string (+ subtotal total-hst)))))))]
+								[(string=? currency "USD")
+								 (quasiquote
+								  (tr ((style "font-weight:bold; font-size:18px"))
+									  (td nbsp)
+									  (td nbsp)
+									  (td nbsp)
+									  (td "Total")
+									  (td nbsp)
+									  (td (unquote (string-append "$" (real->decimal-string subtotal))))))])))
 				  (div (unquote hst-number))
 				  (hr ((style "margin-bottom:50px")))
 				  (hr))))))
