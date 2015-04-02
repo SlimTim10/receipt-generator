@@ -153,7 +153,7 @@
   (define currency (send currency-choice get-string-selection))
   (define date (send date-field get-value))
   (define total-hst (get-total-hst))
-  (define total-final (+ (get-total-price) total-hst))
+  (define subtotal (get-total-price))
   (define hst-number "HST # 811480060 RT 0001")
   (define content
 	(xexpr->string
@@ -227,6 +227,13 @@
 						  (td nbsp)
 						  (td nbsp)
 						  (td nbsp)
+						  (td "Subtotal")
+						  (td nbsp)
+						  (td (unquote (string-append "$" (real->decimal-string subtotal)))))
+						 (tr
+						  (td nbsp)
+						  (td nbsp)
+						  (td nbsp)
 						  (td "HST")
 						  (td nbsp)
 						  (td (unquote (string-append "$" (real->decimal-string total-hst)))))
@@ -236,7 +243,7 @@
 							 (td nbsp)
 							 (td "Total")
 							 (td nbsp)
-							 (td (unquote (string-append "$" (real->decimal-string total-final))))))
+							 (td (unquote (string-append "$" (real->decimal-string (+ subtotal total-hst)))))))
 				  (div (unquote hst-number))
 				  (hr ((style "margin-bottom:50px")))
 				  (hr))))))
