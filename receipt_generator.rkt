@@ -21,10 +21,10 @@
 							[style '(border)]
 							[min-width 800]))
 
-(define rorq-choice (new choice%
+(define document-type-choice (new choice%
 				  [label "Type:"]
 				  [parent settings-panel]
-				  [choices (list "Receipt" "Quote")]))
+				  [choices (list "Receipt" "Quote" "Invoice")]))
 
 (define num-field (new text-field%
 					   [label "Number:"]
@@ -137,16 +137,13 @@
   (-get-total-price item-panels))
 
 (define (generate-document)
-  (define rorq (send rorq-choice get-string-selection))
+  (define document-type (send document-type-choice get-string-selection))
   (define num (send num-field get-value))
-  (define htmlfile (string-append num ".html"))
+  (define htmlfile (string-append (string-downcase (substring document-type 0 1)) num ".html"))
   (define purchaser-org (send purchaser-org-field get-value))
   (define purchaser-name (send purchaser-name-field get-value))
   (define purchaser-email (send purchaser-email-field get-value))
   (define date (send date-field get-value))
-  (if (equal? rorq "Quote")
-	  (set! htmlfile (string-append "q" htmlfile))
-	  (set! htmlfile (string-append "r" htmlfile)))
   (define total-hst (get-total-hst))
   (define total-final (+ (get-total-price) total-hst))
   (define hst-number "HST # 811480060 RT 0001")
@@ -166,11 +163,11 @@
 							  "table#main tr td:nth-child(5) { text-align:right }"
 							  "table#main tr td:nth-child(6) { text-align:right }"
 							  )))
-			 (title (unquote (string-append "Icewire Technologies " rorq))))
+			 (title (unquote (string-append "Icewire Technologies " document-type))))
 			(body ((style "width:680px; margin-left:auto; margin-right:auto"))
 				  (hr)
 				  (div ((style "float:left; font-weight:bold; font-size:40px")) "Icewire Technologies")
-				  (div ((style "float:right; font-weight:bold; font-size:40px; color:grey")) (unquote rorq))
+				  (div ((style "float:right; font-weight:bold; font-size:40px; color:grey")) (unquote document-type))
 				  (div ((style "clear:both; margin-bottom:20px")) (hr))
 				  (table ((style "width:100%"))
 						 (tr
@@ -183,7 +180,7 @@
 							  (p ((style "font-style:italic; font-weight:bold; font-size:16px")) "make@icewire.ca")
 							  (p ((style "font-weight:bold; font-size:18px")) "www.icewire.ca"))
 						  (td ((style "width:33%; text-align:right"))
-							  (p ((style "font-weight:bold; font-size:30px")) (unquote (string-append (substring rorq 0 1) num)))
+							  (p ((style "font-family:serif; font-weight:bold; font-size:30px")) (unquote (string-append (substring document-type 0 1) num)))
 							  (p ((style "font-size:20px")) (unquote (string-append "Date: " date))))))
 				  (div ((style "background-color:#1f497d; width:100%; height:26px; margin:10px 0 10px 0")))
 				  (unquote (if (or (not (string=? purchaser-org "")) (not (string=? purchaser-name "")) (not (string=? purchaser-email "")))
@@ -195,7 +192,7 @@
 											(p ((style "font-style:italic")) (unquote purchaser-org))
 											(p ((style "font-style:italic")) (unquote purchaser-name))
 											(p ((style "font-style:italic")) (unquote purchaser-email)))
-										(unquote (if (equal? rorq "Quote")
+										(unquote (if (string=? document-type "Quote")
 													 (quasiquote (td ((style "width:33%; text-align:center")) "This quote is valid for 30 days"))
 													 ""))
 										(td ((style "width:33%; text-align:right"))))))
