@@ -61,6 +61,7 @@
 (define generate-message (new message%
 							  [label ""]
 							  [parent frame]
+							  [font (make-font #:size 12)]
 							  [auto-resize #t]))
 
 (define (create-item-panels i)
@@ -174,11 +175,11 @@
 						  (td ((style "width:33%; text-align:left; font-style:italic; font-size:16px"))
 							  (p "1560 Bayview Ave, #302")
 							  (p "Toronto, Ontario")
-							  (p "M4G 3B8")
-							  (p "647-478-9946"))
+							  (p "M4G 3B8"))
 						  (td ((style "width:33%; text-align:center; vertical-align:bottom"))
 							  (p ((style "font-style:italic; font-weight:bold; font-size:16px")) "make@icewire.ca")
-							  (p ((style "font-weight:bold; font-size:18px")) "www.icewire.ca"))
+							  (p ((style "font-style:italic; font-weight:bold; font-size:16px")) "647-478-9946")
+							  (p ((style "font-weight:bold; font-size:18px")) "http://make.icewire.ca"))
 						  (td ((style "width:33%; text-align:right"))
 							  (p ((style "font-family:serif; font-weight:bold; font-size:30px")) (unquote (string-append (substring document-type 0 1) num)))
 							  (p ((style "font-size:20px")) (unquote (string-append "Date: " date))))))
@@ -232,7 +233,7 @@
 				  (hr ((style "margin-bottom:50px")))
 				  (hr))))))
   (set! content (string-replace content "ITEM_ROWS" (items-to-html) #:all? #f))
-  (send generate-message set-label (string-append "Generated document: " (path->string (current-directory)) htmlfile))
+  (send generate-message set-label (string-append "Generated document:\n" (path->string (current-directory)) htmlfile "\n\nReview the document before closing this program!"))
   (display-to-file content htmlfile #:mode 'text #:exists 'replace))
 
 (send frame show #t)
