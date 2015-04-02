@@ -3,6 +3,23 @@
 (require xml)
 (require srfi/19)
 
+(define (highest-file-number file-list)
+  (cond
+   [(empty? file-list) 0]
+   [else
+	(let* ([file-string (path->string (first file-list))]
+		   [file-number
+			(if (file-exists? file-string)
+				(let ([file-match (regexp-match #rx".([0-9]+)\\.html" file-string)])
+				  (if (equal? file-match #f)
+					  0
+					  (string->number (second file-match))))
+				0)])
+	  (max file-number (highest-file-number (rest file-list))))]))
+
+(define (get-file-number)
+  (add1 (highest-file-number (directory-list))))
+
 (define frame (new frame%
 				   [label "Icewire Receipt Generator"]
 				   [spacing 10]))
@@ -30,7 +47,7 @@
 (define num-field (new text-field%
 					   [label "Number:"]
 					   [parent settings-panel]
-					   [init-value "100000"]))
+					   [init-value (number->string (get-file-number))]))
 
 (define date-field (new text-field%
 					   [label "Date:"]
