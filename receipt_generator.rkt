@@ -13,7 +13,8 @@
 
 (define settings-panel (new vertical-panel%
 							[parent main-panel]
-							[alignment '(left top)]))
+							[alignment '(left top)]
+							[spacing 10]))
 
 (define item-table-panel (new vertical-panel%
 							[parent main-panel]
@@ -51,6 +52,11 @@
 					   [parent settings-panel]
 					   [min-width 200]
 					   [style '(single vertical-label)]))
+
+(define currency-choice (new choice%
+				  [label "Currency:"]
+				  [parent settings-panel]
+				  [choices (list "CAD" "USD")]))
 
 (define generate-button (new button%
 							 [label "&Generate"]
@@ -144,6 +150,7 @@
   (define purchaser-org (send purchaser-org-field get-value))
   (define purchaser-name (send purchaser-name-field get-value))
   (define purchaser-email (send purchaser-email-field get-value))
+  (define currency (send currency-choice get-string-selection))
   (define date (send date-field get-value))
   (define total-hst (get-total-hst))
   (define total-final (+ (get-total-price) total-hst))
@@ -198,7 +205,8 @@
 													 ""))
 										(td ((style "width:33%; text-align:right"))))))
 							   ""))
-				  (div ((style "float:right; margin-top:100px")) "ALL CDN$")
+				  (div ((style "float:right; margin-top:100px"))
+					   (unquote (string-append "Currency in " currency)))
 				  (table ((id "main") (style "width:100%"))
 						 (tr ((style "font-weight:bold; font-size:20px"))
 							 (th ((style "width:1em; padding:0 0.5em 0 0.5em")) "Item")
